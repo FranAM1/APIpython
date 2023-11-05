@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residuos peligrosos en madrid</title>
+</head>
+<body>
+    <h1>Residuos peligrosos en madrid</h1>
+    <label for="municipio">Municipio: </label>
+    <input type="text" id="municipio" placeholder="Municipio">
+    <button onclick="send()">Enviar</button>
+    <p id="residuos"></p>
+    <h2> Porcentaje de residuos respecto todo Madrid </h2>
+    <button onclick="calcPercentage()">Calcular porcentaje</button>
+    <p id="percentage"> </p>
+</body>
+    <script>
+        const MY_API_URL = "http://localhost:8000/residuos"
+
+        async function send() {
+            const municipio = document.getElementById("municipio").value;
+           
+            const json = {
+                  municipio: municipio,
+            };
+ 
+            const response = await fetch(MY_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(json),
+            });
+
+            const data = await response.json();
+            console.log(data);
+            printResiduos(data);
+        }
+
+        async function printResiduos(arrayAPI){
+            var residuos = document.getElementById("residuos");
+            residuos.innerHTML = "";
+
+            if (arrayAPI.length == 0) {
+                residuos.innerHTML = "No hay residuos en este municipio";
+            }else{
+                for (let i = 0; i < arrayAPI.length; i++) {
+                    const element = arrayAPI[i];
+                    residuos.innerHTML += "<b>Direccion: </b> "+element.DIRECCION + " | <b> Actividad: </b>"+element.ACTIVIDAD + "<br><br>";
+                }
+            }
+            
+        }
+
+        async function calcPercentage(){
+
+        }
+       
+    </script>
+</html>
