@@ -2,7 +2,6 @@ import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
 class Residuo(BaseModel):
     municipio: str
 
@@ -18,7 +17,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 API_URL = "https://services1.arcgis.com/nCKYwcSONQTkPA4K/arcgis/rest/services/ResiduosPeligrosos/FeatureServer/0/query"
 
@@ -67,7 +65,7 @@ async def residuosMunicipio(residuo: Residuo):
 
     return parsed_features
 
-@app.post("/residuos/porcentage")
+@app.post("/residuos/percentage")
 async def porcentajeResiduos(residuo: Residuo):
     percentage = 0
     allMunicipios = 0
@@ -91,7 +89,7 @@ async def porcentajeResiduos(residuo: Residuo):
         parsed_features.append(feature['attributes'])
     
     for feature in parsed_features:
-        if feature['municipio'] == municipio:
+        if feature['MUNICIPIO'] == municipio:
             countMunicipio += 1
         allMunicipios += 1
 
@@ -99,6 +97,7 @@ async def porcentajeResiduos(residuo: Residuo):
     percentage = countMunicipio / allMunicipios
     
     return percentage
+
 
     
     
