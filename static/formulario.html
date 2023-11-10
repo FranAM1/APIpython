@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Residuos peligrosos en madrid</title>
+    <title>Residuos peligrosos en la comunidad de Madrid</title>
     <style>
         *{
             box-sizing: border-box;
@@ -14,20 +14,27 @@
             height: 100vh;
         }
         .gif{
-            width: 100%;
-            height: 100%;
+            width: 70%;
+            height: 70%;
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: none;
             z-index: 1;
         }
     </style>
 </head>
 <body>
-    <img class="gif" src="gifpensar.gif" />
+    <img class="gif" id="gifPensar" src="gifpensar.gif" />
     <header>
-        <h1>Residuos peligrosos en madrid</h1>
+        <h1>Residuos peligrosos en la comunidad de Madrid</h1>
         <label for="municipio">Municipio: </label>
-        <input type="text" id="municipio" placeholder="Municipio">
+        <select id="municipio" placeholder="Municipio">
+            <option value="Madrid">Madrid</option>
+            <option value="Ciempozuelos">Ciempozuelos</option>
+            <option value="Coslada">Coslada</option>
+        </select>
         
     </header>
     <main>
@@ -37,18 +44,36 @@
             <p id="residuos"></p>
         </section>
         <section>
-            <h2> Porcentaje de residuos en el municipio respecto todo Madrid </h2>
+            <h2> Porcentaje de residuos en el municipio respecto a toda la comunidad de Madrid </h2>
             <button onclick="calcPercentage()">Calcular porcentaje</button>
             <p id="percentage"> </p>
+        </section>
+        <br><br>
+        <section>
+            <h2>Porcentaje de zonas en el municipio de Madrid que realizan esa actividad peligrosa</h2>
+            <label for="actividad">Actividad: </label>  
+            <select id="actividad" placeholder="Actividad">
+                <option value="Almacenamiento de Residuos Peligrosos">Almacenamiento de Residuos Peligrosos</option>
+                <option value="Almacenamiento y Clasificacian de Baterias de Plomo">
+                    Almacenamiento y Clasificacian de Baterias de Plomo</option>
+            </select>
+            <br><br>
+            <button onclick="calcPercentageActividades()">Mostrar municipios</button>
+            <p id="percentageActividades"></p>
         </section>
     </main>
    
 </body>
     <script>
         const MY_API_URL = "http://localhost:8000/residuos"
+        const gifPensar = document.getElementById("gifPensar");
 
         async function send() {
             const municipio = document.getElementById("municipio").value;
+            let residuos = document.getElementById("residuos")
+            residuos.innerHTML = "";
+
+            gifPensar.style.display = "block";
            
             const json = {
                   municipio: municipio,
@@ -69,6 +94,9 @@
 
         async function calcPercentage(){
             const municipio = document.getElementById("municipio").value;
+            let percentageHTML = document.getElementById("percentage");
+            gifPensar.style.display = "block";
+            percentageHTML.innerHTML = "";
            
             const json = {
                   municipio: municipio,
@@ -87,6 +115,29 @@
             printPercentage(data);
         }
 
+        async function calcPercentageActividades(){
+            const actividad = document.getElementById("actividad").value;
+            let percentageHTML = document.getElementById("percentageActividades");
+            gifPensar.style.display = "block";
+            percentageHTML.innerHTML = "";
+           
+            const json = {
+                  actividad: actividad,
+            };
+
+            const response = await fetch(MY_API_URL+"/actividad/percentage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(json),
+            });
+
+            const data = await response.json();
+            console.log(data);
+            printPercentageActividades(data);
+        }
+
         async function printResiduos(arrayAPI){
             let residuos = document.getElementById("residuos");
             residuos.innerHTML = "";
@@ -99,7 +150,8 @@
                     residuos.innerHTML += "<b>Direccion: </b> "+element.DIRECCION + " | <b> Actividad: </b>"+element.ACTIVIDAD + "<br><br>";
                 }
             }
-            
+
+            gifPensar.style.display = "none";
         }
 
         async function printPercentage(percentage){
@@ -107,6 +159,17 @@
             percentageHTML.innerHTML = "";
 
             percentageHTML.innerHTML = "<b>Porcentaje de residuos peligrosos respecto a todo Madrid: </b>"+percentage*100+"%";
+
+            gifPensar.style.display = "none";
+        }
+
+        async function printPercentageActividades(percentage){
+            let percentageHTML = document.getElementById("percentageActividades");
+            percentageHTML.innerHTML = "";
+
+            percentageHTML.innerHTML = "<b>Porcentaje de lugares que realizan esa actividad: </b>"+percentage*100+"%";
+
+            gifPensar.style.display = "none";
         }
        
     </script>

@@ -1,12 +1,21 @@
+from fastapi.responses import RedirectResponse
 import requests
-from fastapi import FastAPI
+from pathlib import Path
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+
 class Residuo(BaseModel):
     municipio: str
 
+class Actividad(BaseModel):
+    actividad: str
 
 app = FastAPI()
+
+static_dir = Path('./static')
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 origins = ["*"]
 
@@ -22,7 +31,7 @@ API_URL = "https://services1.arcgis.com/nCKYwcSONQTkPA4K/arcgis/rest/services/Re
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return RedirectResponse(url="/static/formulario.html", status_code=status.HTTP_302_FOUND)
 
 @app.get("/residuos")
 async def residuos():
@@ -98,6 +107,42 @@ async def porcentajeResiduos(residuo: Residuo):
     
     return percentage
 
+
+
+@app.post("/residuos/actividad/percentage")
+async def porcentajeActividades(actividad: Actividad):
+    percentage = 0
+    allActividades = 0
+    countActividades = 0
+    actividadFiltro = actividad.actividad
+
+    params = {
+        'where': '1=1',
+        'outFields': '*',
+        'outSR': '4326',
+        'f': 'json'
+    }
+
+    response = requests.get(API_URL, params = params)
+    data = response.json()
+
+    features = data['features']
+    parsed_features = []
+
+    for feature in features:
+        parsed_features.append(feature['attributes'])
+    
+    for feature in parsed_features:
+        if feature['ACTIVIDAD'] == actividadFiltro:
+            countActividades += 1
+        allActividades += 1
+
+
+    percentage = countActividades / allActividades
+    
+    print(percentage)
+
+    return percentage
 
     
     
